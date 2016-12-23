@@ -1,5 +1,6 @@
 # MVVM Light Toolkit
 ---
+
 [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android--MVVMLight-brightgreen.svg?style=flat)](https://android-arsenal.com/details/1/3737)
 
 A toolkit help to build Android MVVM Application，We have more
@@ -11,6 +12,15 @@ attributes for Data Binding  of View(like Uri for ImageView) ,we create some com
 ```
  
 requires at least android gradle plugin 1.5.0.
+
+>
+>##RxJava2 Supported Download##
+>
+>[ ![Download](https://api.bintray.com/packages/4332weizi/Android/MVVMLight/images/download.svg) ](https://>bintray.com/4332weizi/Android/MVVMLight/_latestVersion)
+>
+>```
+> compile 'net.funol.mvvmlight:library:1.1.0'
+>```
 
 ##Usage##
 ---

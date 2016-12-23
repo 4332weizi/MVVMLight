@@ -1,11 +1,17 @@
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
-// This is the library version used when deploying the artifact
-version = "1.0.0"
 
-def siteUrl = 'https://github.com/Kelin-Hong/MVVMLight'      // 项目的主页
-def gitUrl = 'https://github.com/Kelin-Hong/MVVMLight.git'   // Git仓库的url
-group = "com.kelin.mvvmlight"                                        // Maven Group ID for the artifact，一般填你唯一的包名
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+// This is the library version used when deploying the artifact
+version = "1.1.0"
+
+def siteUrl = properties.getProperty("siteUrl")    // 项目的主页
+def gitUrl = properties.getProperty("gitUrl")      // Git仓库的url
+
+group = properties.getProperty("group")            // Maven Group ID for the artifact，一般填你唯一的包名
+
 install {
     repositories.mavenInstaller {
         // This generates POM.xml with proper parameters
@@ -24,9 +30,9 @@ install {
                 }
                 developers {
                     developer {
-                        id 'KelinHong'        //填写的一些基本信息
-                        name 'KelinHong'
-                        email 'kelinhong1218@gmail.com'
+                        id properties.getProperty("bintray.developer.id")        //填写的一些基本信息
+                        name properties.getProperty("bintray.developer.name")
+                        email properties.getProperty("bintray.developer.email")
                     }
                 }
                 scm {
@@ -58,15 +64,13 @@ artifacts {
     archives sourcesJar
 }
 
-Properties properties = new Properties()
-properties.load(project.rootProject.file('local.properties').newDataInputStream())
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
     configurations = ['archives']
     pkg {
-        repo = "maven"
-        name = "MVVMLight"    //发布到JCenter上的项目名字
+        repo = properties.getProperty("bintray.pkg.repo")
+        name = properties.getProperty("bintray.pkg.name")  //发布到JCenter上的项目名字
         websiteUrl = siteUrl
         vcsUrl = gitUrl
         licenses = ["Apache-2.0"]
