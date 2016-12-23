@@ -3,9 +3,9 @@ package com.kelin.mvvmlight.zhihu.news;
 import java.io.Serializable;
 import java.util.List;
 
+import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
-import rx.Observable;
 
 /**
  * Created by kelin on 16-4-26.

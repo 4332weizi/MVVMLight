@@ -20,7 +20,7 @@ import com.kelin.mvvmlight.messenger.Messenger;
 import com.kelin.mvvmlight.zhihu.news.NewsListFragment;
 import com.kelin.mvvmlight.zhihu.utils.AlphaForegroundColorSpan;
 import com.kelin.mvvmlight.zhihu.utils.ViewUtils;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 import com.viewpagerindicator.CirclePageIndicator;
 
 public class MainActivity extends RxAppCompatActivity

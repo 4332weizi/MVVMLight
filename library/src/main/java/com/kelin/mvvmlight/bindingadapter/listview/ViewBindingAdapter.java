@@ -10,7 +10,8 @@ import com.kelin.mvvmlight.command.ReplyCommand;
 
 import java.util.concurrent.TimeUnit;
 
-import rx.subjects.PublishSubject;
+import io.reactivex.subjects.PublishSubject;
+
 
 /**
  * Created by kelin on 16-3-24.

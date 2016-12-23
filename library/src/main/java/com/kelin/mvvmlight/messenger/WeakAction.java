@@ -1,57 +1,66 @@
 package com.kelin.mvvmlight.messenger;
 
+import com.kelin.mvvmlight.command.consumer.Consumer0;
+
 import java.lang.ref.WeakReference;
 
-import rx.functions.Action0;
-import rx.functions.Action1;
+import io.reactivex.functions.Consumer;
 
 /**
  * Created by kelin on 15-8-14.
  */
 public class WeakAction<T> {
-    private Action0 action;
-    private Action1<T> action1;
+    private Consumer0 consumer0;
+    private Consumer<T> consumer;
     private boolean isLive;
     private Object target;
     private WeakReference reference;
 
-    public WeakAction(Object target, Action0 action) {
+    public WeakAction(Object target, Consumer0 consumer) {
         reference = new WeakReference(target);
-        this.action = action;
+        this.consumer0 = consumer;
 
     }
 
-    public WeakAction(Object target, Action1<T> action1) {
+    public WeakAction(Object target, Consumer<T> consumer) {
         reference = new WeakReference(target);
-        this.action1 = action1;
+        this.consumer = consumer;
     }
 
     public void execute() {
-        if (action != null && isLive()) {
-            action.call();
+        if (consumer0 != null && isLive()) {
+            try {
+                consumer0.accept();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public void execute(T parameter) {
-        if (action1 != null
+        if (consumer != null
                 && isLive()) {
-            action1.call(parameter);
+            try {
+                consumer.accept(parameter);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     public void markForDeletion() {
         reference.clear();
         reference = null;
-        action = null;
-        action1 = null;
+        consumer0 = null;
+        consumer = null;
     }
 
-    public Action0 getAction() {
-        return action;
+    public Consumer0 getConsumer0() {
+        return consumer0;
     }
 
-    public Action1 getAction1() {
-        return action1;
+    public Consumer<T> getConsumer() {
+        return consumer;
     }
 
     public boolean isLive() {

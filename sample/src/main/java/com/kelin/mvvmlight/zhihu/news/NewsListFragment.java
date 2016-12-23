@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 
 import com.kelin.mvvmlight.zhihu.R;
 import com.kelin.mvvmlight.zhihu.databinding.FragmentNewListBinding;
-import com.trello.rxlifecycle.components.RxFragment;
+import com.trello.rxlifecycle2.components.RxFragment;
 
 /**
  * Created by kelin on 16-4-25.

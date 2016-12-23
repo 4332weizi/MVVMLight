@@ -7,25 +7,26 @@ import android.databinding.ObservableList;
 import android.support.v4.util.Pair;
 import android.widget.Toast;
 
-import com.kelin.mvvmlight.BR;
 import com.kelin.mvvmlight.base.ViewModel;
 import com.kelin.mvvmlight.command.ReplyCommand;
 import com.kelin.mvvmlight.messenger.Messenger;
 import com.kelin.mvvmlight.zhihu.R;
+import com.kelin.mvvmlight.zhihu.BR;
 import com.kelin.mvvmlight.zhihu.ZhiHuApp;
 import com.kelin.mvvmlight.zhihu.retrofit.RetrofitProvider;
-import com.trello.rxlifecycle.FragmentLifecycleProvider;
+import com.trello.rxlifecycle2.LifecycleProvider;
+import com.trello.rxlifecycle2.android.FragmentEvent;
 
 import java.util.Calendar;
 
+import io.reactivex.Notification;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+import io.reactivex.subjects.BehaviorSubject;
 import me.tatarka.bindingcollectionadapter.BaseItemViewSelector;
 import me.tatarka.bindingcollectionadapter.ItemView;
 import me.tatarka.bindingcollectionadapter.ItemViewSelector;
-import rx.Notification;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
-import rx.subjects.BehaviorSubject;
 
 /**
  * Created by kelin on 16-4-25.
@@ -110,7 +111,7 @@ public class NewsViewModel implements ViewModel {
                         .getNewsList(date)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .compose(((FragmentLifecycleProvider) fragment).bindToLifecycle())
+                        .compose(((LifecycleProvider<FragmentEvent>) fragment).bindToLifecycle())
                         .materialize().share();
 
         newsListOb.filter(Notification::isOnNext)
@@ -121,12 +122,12 @@ public class NewsViewModel implements ViewModel {
                         .subscribe(d -> itemViewModel.add(new NewItemViewModel(fragment.getActivity(), d))))
                 .doOnNext(m -> news = m)
                 .doAfterTerminate(()-> viewStyle.isRefreshing.set(false))
-                .flatMap(m -> Observable.from(m.getStories()))
+                .flatMap(m -> Observable.fromIterable(m.getStories()))
                 .subscribe(i -> itemViewModel.add(new NewItemViewModel(fragment.getActivity(), i)));
 
 
         NewsListHelper.dealWithResponseError(newsListOb.filter(Notification::isOnError)
-                .map(n -> n.getThrowable()));
+                .map(n -> n.getError()));
 
 
     }
@@ -137,12 +138,12 @@ public class NewsViewModel implements ViewModel {
         Observable<TopNewsService.News> topNewsOb =
                 RetrofitProvider.getInstance().create(TopNewsService.class)
                         .getTopNewsList()
-                        .compose(((FragmentLifecycleProvider) fragment).bindToLifecycle());
+                        .compose(((LifecycleProvider<FragmentEvent>) fragment).bindToLifecycle());
 
         Observable<NewsService.News> newsListOb =
                 RetrofitProvider.getInstance().create(NewsService.class)
                         .getNewsList(date)
-                        .compose(((FragmentLifecycleProvider) fragment).bindToLifecycle());
+                        .compose(((LifecycleProvider<FragmentEvent>) fragment).bindToLifecycle());
 
 
         Observable<Notification<Pair<TopNewsService.News, NewsService.News>>> combineRequestOb = Observable.combineLatest(topNewsOb, newsListOb, Pair::new)
@@ -162,7 +163,7 @@ public class NewsViewModel implements ViewModel {
                 .map(n -> n.getValue())
                 .map(p -> p.second).filter(m -> !m.getStories().isEmpty())
                 .doOnNext(m -> news = m)
-                .flatMap(m -> Observable.from(m.getStories()))
+                .flatMap(m -> Observable.fromIterable(m.getStories()))
                 .subscribe(i -> itemViewModel.add(new NewItemViewModel(fragment.getActivity(), i)));
 
         combineRequestOb.subscribe((n) -> {
@@ -171,7 +172,7 @@ public class NewsViewModel implements ViewModel {
         });
 
         NewsListHelper.dealWithResponseError(combineRequestOb.filter(Notification::isOnError)
-                .map(n -> n.getThrowable()));
+                .map(n -> n.getError()));
 
     }
 

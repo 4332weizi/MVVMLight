@@ -10,7 +10,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.kelin.mvvmlight.zhihu.R;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
+import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 public class NewsDetailActivity extends RxAppCompatActivity {
     public static final String EXTRA_KEY_NEWS_ID = "key_news_id";

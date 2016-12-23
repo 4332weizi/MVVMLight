@@ -4,24 +4,25 @@ import android.app.Activity;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.kelin.mvvmlight.base.ViewModel;
 import com.kelin.mvvmlight.command.ReplyCommand;
 import com.kelin.mvvmlight.zhihu.retrofit.RetrofitProvider;
 import com.kelin.mvvmlight.zhihu.retrofit.ToStringConverter;
-import com.trello.rxlifecycle.ActivityLifecycleProvider;
+import com.trello.rxlifecycle2.LifecycleProvider;
+import com.trello.rxlifecycle2.android.ActivityEvent;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import io.reactivex.Notification;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import rx.Notification;
-import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 /**
  * Created by kelin on 16-4-28.
@@ -70,7 +71,7 @@ public class NewsDetailViewModel implements ViewModel {
                         .getNewsDetail(id)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .compose(((ActivityLifecycleProvider) activity).bindToLifecycle())
+                        .compose(((LifecycleProvider<ActivityEvent>) activity).bindToLifecycle())
                         .materialize().share();
 
         newsDetailOb.filter(Notification::isOnNext)
@@ -82,7 +83,7 @@ public class NewsDetailViewModel implements ViewModel {
     private void loadHtmlCss(List<String> urls) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://news-at.zhihu.com/")
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .addConverterFactory(new Converter.Factory() {
                     @Override
                     public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
@@ -90,17 +91,17 @@ public class NewsDetailViewModel implements ViewModel {
                     }
                 }).build();
 
-        Observable.from(urls)
+        Observable.fromIterable(urls)
                 .flatMap(s -> retrofit
                         .create(NewsDetailCssService.class)
                         .getNewsDetailCss(s)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .compose(((ActivityLifecycleProvider) activity).bindToLifecycle())
+                        .compose(((LifecycleProvider<ActivityEvent>) activity).bindToLifecycle())
                         .materialize().share().filter(Notification::isOnNext).map(n -> n.getValue()))
                 .scan((s1, s2) -> s1 + s2)
-                .last()
-                .doOnNext(s -> newsDetail.setCssStr(s))
+                .lastElement()
+                .doAfterSuccess(s -> newsDetail.setCssStr(s))
                 .doAfterTerminate(() -> viewStyle.progressRefreshing.set(false))
                 .subscribe(s -> initViewModelField());
     }
